@@ -1,0 +1,122 @@
+{% extends 'home/bienvenida.html' %}
+{% block title %}Gestión de Usuarios{% endblock %}
+{% block contentVista %}
+
+<div class="container-fluid">
+
+    <!-- Cabecera -->
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Gestión de Usuarios</h2>
+        </div>
+        <div class="col text-end">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createUserModal">
+                Agregar Usuario
+            </button>
+        </div>
+    </div>
+
+    <!-- Buscador -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <form method="GET" class="d-flex">
+                <input type="text" name="q" class="form-control me-2" placeholder="Buscar usuarios..." value="{{ query }}">
+                <button type="submit" class="btn btn-outline-primary">Buscar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabla de usuarios -->
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Rol</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for usuario in usuarios %}
+                <tr>
+                    <td>{{ usuario.username }}</td>
+                    <td>{{ usuario.nombre }} {{ usuario.apellido }}</td>
+                    <td>{{ usuario.email }}</td>
+                    <td>{{ usuario.rol.nombre|default:"Sin rol" }}</td>
+                    <td>
+                        <span class="badge {% if usuario.is_active %}bg-success{% else %}bg-danger{% endif %}">
+                            {% if usuario.is_active %}Activo{% else %}Inactivo{% endif %}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{% url 'usuarios:editar_usuario' usuario.id %}" class="btn btn-sm btn-warning">Editar</a>
+                        <form action="{% url 'usuarios:gestionar_usuarios' %}" method="POST" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="user_id" value="{{ usuario.id }}">
+                            <button type="submit" name="delete" class="btn btn-sm btn-danger" 
+                                    onclick="return confirm('¿Estás seguro de que deseas eliminar este usuario?')">
+                                Eliminar
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">No hay usuarios registrados.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal para crear usuario -->
+    <div class="modal fade {% if show_modal %}show{% endif %}" id="createUserModal" tabindex="-1" 
+         aria-labelledby="createUserModalLabel" aria-hidden="true" 
+         {% if show_modal %}style="display: block;"{% endif %}>
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createUserModalLabel">Crear Nuevo Usuario</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{% url 'usuarios:gestionar_usuarios' %}" method="POST">
+                    <div class="modal-body">
+                        {% csrf_token %}
+                        {% for field in form %}
+                        <div class="mb-3">
+                            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.help_text %}
+                            <div class="form-text">{{ field.help_text }}</div>
+                            {% endif %}
+                            {% if field.errors %}
+                            <div class="alert alert-danger">
+                                {{ field.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        <button type="submit" name="create" class="btn btn-primary">Crear Usuario</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if show_modal %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var modal = new bootstrap.Modal(document.getElementById('createUserModal'));
+        modal.show();
+    });
+</script>
+{% endif %}
+
+{% endblock %}

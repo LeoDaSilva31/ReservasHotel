@@ -1,0 +1,87 @@
+{% extends 'home/bienvenida.html' %}
+
+{% block page_title %}Detalles de Reservas{% endblock %}
+
+{% block contentVista %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h2>Detalle de Reserva</h2>
+        </div>
+        <div class="col-md-6 text-end">
+            <a href="{% url 'reservations:calendar' %}" class="btn btn-secondary">
+                <i class="fas fa-calendar"></i> Volver al Calendario
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="card-title">Información de la Reserva</h5>
+                    <table class="table">
+                        <tr>
+                            <th>Habitación:</th>
+                            <td>{{ object.room.number }} - {{ object.room.room_type }}</td>
+                        </tr>
+                        <tr>
+                            <th>Huésped:</th>
+                            <td>{{ object.guest_name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Email:</th>
+                            <td>{{ object.guest_email }}</td>
+                        </tr>
+                        <tr>
+                            <th>Teléfono:</th>
+                            <td>{{ object.guest_phone }}</td>
+                        </tr>
+                        <tr>
+                            <th>Check-in:</th>
+                            <td>{{ object.check_in }}</td>
+                        </tr>
+                        <tr>
+                            <th>Check-out:</th>
+                            <td>{{ object.check_out }}</td>
+                        </tr>
+                        <tr>
+                            <th>Creada por:</th>
+                            <td>{{ object.created_by }}</td>
+                        </tr>
+                        <tr>
+                            <th>Fecha de creación:</th>
+                            <td>{{ object.created_at }}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="card-title">Estado de la Reserva</h5>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Estado actual:</label>
+                            {{ status_form.status }}
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Actualizar Estado
+                        </button>
+                    </form>
+
+                    <!-- Información sobre estados -->
+                    <div class="mt-4">
+                        <h6>Información sobre estados:</h6>
+                        <div class="small">
+                            <p><span class="badge bg-warning">Pendiente</span> - Esperando confirmación</p>
+                            <p><span class="badge bg-info">Pre-reservada</span> - Esperando pago</p>
+                            <p><span class="badge bg-success">Confirmada</span> - Reserva garantizada</p>
+                            <p><span class="badge" style="background-color: #6f42c1;">Check-in</span> - Huésped en el hotel</p>
+                            <p><span class="badge bg-secondary">Check-out</span> - Estadía completada</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

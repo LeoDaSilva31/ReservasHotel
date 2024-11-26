@@ -1,0 +1,66 @@
+<!-- aplicaciones/reservas/templates/reservas/lista_reservas.html -->
+{% extends 'home/bienvenida.html' %}
+
+{% block page_title %}Lista de Reservas{% endblock %}
+
+{% block contentVista %}
+<div class="row mb-4">
+    <div class="col">
+        <h2>Reservas</h2>
+    </div>
+    <div class="col text-end">
+        <a href="{% url 'reservations:create' %}" class="btn btn-primary">
+            Nueva Reserva
+        </a>
+    </div>
+    <div class="col-md-6 text-end">
+        <a href="{% url 'reservations:calendar' %}" class="btn btn-secondary">
+            <i class="fas fa-calendar"></i> Ir al Calendario
+        </a>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Huésped</th>
+                <th>Habitación</th>
+                <th>Entrada</th>
+                <th>Salida</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for reservation in reservations %}
+            <tr>
+                <td>{{ reservation.guest_name }}</td>
+                <td>{{ reservation.room }}</td>
+                <td>{{ reservation.check_in }}</td>
+                <td>{{ reservation.check_out }}</td>
+                <td>
+                    <span class="badge {% if reservation.status == 'confirmed' %}bg-success
+                        {% elif reservation.status == 'pending' %}bg-warning
+                        {% elif reservation.status == 'cancelled' %}bg-danger
+                        {% elif reservation.status == 'pre_reserved' %}bg-info
+                        {% else %}bg-secondary{% endif %}">
+                        {{ reservation.get_status_display }}
+                    </span>
+                </td>
+                <td>
+                    <a href="{% url 'reservations:detail' reservation.pk %}" 
+                       class="btn btn-sm btn-info">Ver</a>
+                    <a href="{% url 'reservations:update' reservation.pk %}" 
+                       class="btn btn-sm btn-warning">Editar</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center">No hay reservas registradas.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

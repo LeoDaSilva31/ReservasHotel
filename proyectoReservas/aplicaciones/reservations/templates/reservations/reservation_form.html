@@ -1,0 +1,153 @@
+{% extends 'home/bienvenida.html' %}
+
+{% block page_title %}Formulario de Reservas{% endblock %}
+{% block title %}
+    {% if form.instance.pk %}
+        Editar Reserva
+    {% else %}
+        Nueva Reserva
+    {% endif %}
+{% endblock %}
+
+{% block contentVista %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h2>
+                {% if form.instance.pk %}
+                    Editar Reserva
+                {% else %}
+                    Nueva Reserva
+                {% endif %}
+            </h2>
+        </div>
+        <div class="col-md-6 text-end">
+            <a href="{% url 'reservations:calendar' %}" class="btn btn-secondary">
+                <i class="fas fa-calendar"></i> Ir al Calendario
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post" novalidate>
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {% for error in form.non_field_errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="{{ form.room.id_for_label }}" class="form-label">{{ form.room.label }}</label>
+                            {{ form.room }}
+                            {% if form.room.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.room.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.guest_name.id_for_label }}" class="form-label">{{ form.guest_name.label }}</label>
+                            {{ form.guest_name }}
+                            {% if form.guest_name.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.guest_name.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.guest_email.id_for_label }}" class="form-label">{{ form.guest_email.label }}</label>
+                            {{ form.guest_email }}
+                            {% if form.guest_email.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.guest_email.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.guest_phone.id_for_label }}" class="form-label">{{ form.guest_phone.label }}</label>
+                            {{ form.guest_phone }}
+                            {% if form.guest_phone.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.guest_phone.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="{{ form.check_in.id_for_label }}" class="form-label">{{ form.check_in.label }}</label>
+                            {{ form.check_in }}
+                            {% if form.check_in.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.check_in.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.check_out.id_for_label }}" class="form-label">{{ form.check_out.label }}</label>
+                            {{ form.check_out }}
+                            {% if form.check_out.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.check_out.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.status.id_for_label }}" class="form-label">{{ form.status.label }}</label>
+                            {{ form.status }}
+                            {% if form.status.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.status.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-12 text-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> 
+                            {% if form.instance.pk %}
+                                Guardar Cambios
+                            {% else %}
+                                Crear Reserva
+                            {% endif %}
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Establecer fecha mínima para check-in y check-out
+    var today = new Date().toISOString().split('T')[0];
+    document.getElementById('{{ form.check_in.id_for_label }}').setAttribute('min', today);
+    document.getElementById('{{ form.check_out.id_for_label }}').setAttribute('min', today);
+
+    // Actualizar fecha mínima de check-out cuando cambia check-in
+    document.getElementById('{{ form.check_in.id_for_label }}').addEventListener('change', function() {
+        var checkInDate = this.value;
+        document.getElementById('{{ form.check_out.id_for_label }}').setAttribute('min', checkInDate);
+    });
+});
+</script>
+{% endblock %}

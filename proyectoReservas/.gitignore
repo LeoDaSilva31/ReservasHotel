@@ -1,0 +1,67 @@
+# Entorno Virtual
+venv/
+env/
+.venv/
+.env/
+
+# Archivos de Python
+*.py[cod]
+__pycache__/
+*.so
+
+# Archivos de entorno
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Bases de datos locales
+*.sqlite3
+db.sqlite3
+
+# Archivos de migración (opcional, depende de tu estrategia)
+# **/migrations/**
+# !**/migrations/__init__.py
+
+# Archivos de configuración de IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Logs
+*.log
+local_logs/
+
+# Archivos de sistema
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Archivos de configuración y dependencias
+*.egg-info/
+dist/
+build/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Archivos de producción y media
+/media/
+/static/
+
+# Archivos de pruebas de coverage
+.coverage
+.coverage.*
+coverage/
+htmlcov/
+
+# Archivos de seguridad
+secrets.json
+
+# Backups
+*.bak

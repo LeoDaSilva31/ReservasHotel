@@ -1,0 +1,55 @@
+<!-- aplicaciones/home/templates/home/bienvenida.html -->
+{% extends 'usuarios/base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title|default:"Dashboard - Bienvenida" }}{% endblock %}
+
+{% block content %}
+<div class="w-100"> 
+    <div class="row g-0">
+        <!-- Barra de navegación superior -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'reservations:list' %}active{% endif %}" href="{% url 'reservations:list' %}">
+                                <i class="fas fa-calendar-alt me-2"></i>
+                                Reservas
+                            </a>
+                        </li>
+                        <!-- 
+                        
+                        BOTON A GESTIONAR USUARIOS 
+                        
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'usuarios:gestionar_usuarios' %}active{% endif %}" href="{% url 'usuarios:gestionar_usuarios' %}">
+                                <i class="fas fa-users me-2"></i>
+                                Usuarios
+                            </a>
+                        </li>
+
+                        -->
+
+
+                        
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Contenido principal -->
+        <main class="col-md-12 p-0">
+            {% block contentVista %}
+            <!-- Contenido específico de cada vista -->
+            <div class="row g-0">
+                {% block dashboard_content %}{% endblock %}
+            </div>
+            {% endblock %}
+        </main>
+    </div>
+</div>
+
+{% endblock %}

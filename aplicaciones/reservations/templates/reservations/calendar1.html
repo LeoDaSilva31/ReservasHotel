@@ -1,0 +1,310 @@
+{% extends 'home/bienvenida.html' %}
+
+{% block page_title %}Calendario{% endblock %}
+
+{% block extra_css %}
+<link href="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.css" rel="stylesheet" />
+<style>
+    #calendar {
+        margin: 20px 0;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .fc-event {
+        cursor: pointer;
+        padding: 2px 4px;
+        margin: 1px 0;
+    }
+    
+    .room-filter {
+        margin: 20px 0;
+        padding: 15px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .legend {
+        margin-top: 20px;
+        padding: 15px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    
+    .legend-item {
+        display: inline-block;
+        margin: 5px 15px;
+        padding: 5px 10px;
+        border-radius: 4px;
+        background: #f8f9fa;
+        cursor: help;
+    }
+    
+    .legend-color {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        margin-right: 8px;
+        vertical-align: middle;
+        border-radius: 3px;
+    }
+
+    .fc-toolbar-title {
+        font-size: 1.5em !important;
+        font-weight: bold !important;
+    }
+
+    .fc-button-primary {
+        background-color: #0d6efd !important;
+        border-color: #0d6efd !important;
+    }
+
+    .fc-button-primary:hover {
+        background-color: #0b5ed7 !important;
+        border-color: #0a58ca !important;
+    }
+
+    .fc-daygrid-day:hover {
+        background-color: #f8f9fa;
+    }
+
+    #room-filter {
+        width: 100%;
+        max-width: 300px;
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px solid #ced4da;
+    }
+
+    .help-button {
+        margin-top: 10px;
+    }
+
+    .modal-body h6 {
+        margin-top: 15px;
+    }
+</style>
+{% endblock %}
+
+{% block contentVista %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h2>Calendario de Reservas</h2>
+        </div>
+        <div class="col-md-6 text-end">
+            <a href="{% url 'reservations:create' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Nueva Reserva
+            </a>
+        </div>
+    </div>
+
+    <div class="room-filter">
+        <div class="row align-items-center">
+            <div class="col-md-3">
+                <label class="form-label"><strong>Filtrar por habitación:</strong></label>
+            </div>
+            <div class="col-md-9">
+                <select id="room-filter" class="form-select">
+                    <option value="all">Todas las habitaciones</option>
+                    {% for room in rooms %}
+                    <option value="{{ room.id }}">{{ room.number }} - {{ room.room_type }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div id="calendar"></div>
+
+    <div class="legend">
+        <h5 class="mb-3">Estados de Reserva</h5>
+        <div class="legend-item" data-bs-toggle="tooltip" data-bs-placement="top" 
+             title="La reserva está garantizada. El pago o seña ha sido recibido.">
+            <span class="legend-color" style="background: #28a745;"></span>
+            Confirmada
+            <i class="fas fa-info-circle ms-1"></i>
+        </div>
+        <div class="legend-item" data-bs-toggle="tooltip" data-bs-placement="top"
+             title="Estado inicial cuando se crea una nueva reserva. Esperando confirmación.">
+            <span class="legend-color" style="background: #ffc107;"></span>
+            Pendiente
+            <i class="fas fa-info-circle ms-1"></i>
+        </div>
+        <div class="legend-item" data-bs-toggle="tooltip" data-bs-placement="top"
+             title="La habitación está temporalmente apartada. Se espera confirmación o pago.">
+            <span class="legend-color" style="background: #17a2b8;"></span>
+            Pre-reservada
+            <i class="fas fa-info-circle ms-1"></i>
+        </div>
+        <div class="legend-item" data-bs-toggle="tooltip" data-bs-placement="top"
+             title="El huésped ya llegó al hotel. La habitación está ocupada.">
+            <span class="legend-color" style="background: #6f42c1;"></span>
+            Check-in
+            <i class="fas fa-info-circle ms-1"></i>
+        </div>
+        <div class="legend-item" data-bs-toggle="tooltip" data-bs-placement="top"
+             title="El huésped ya se retiró. La habitación necesita limpieza.">
+            <span class="legend-color" style="background: #6c757d;"></span>
+            Check-out
+            <i class="fas fa-info-circle ms-1"></i>
+        </div>
+
+        <div class="help-button">
+            <button type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#helpModal">
+                <i class="fas fa-question-circle"></i> Más información sobre los estados
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal de ayuda -->
+    <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="helpModalLabel">Estados de Reserva - Información Detallada</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <h6><span class="badge bg-warning">Pendiente</span></h6>
+                        <p>Estado inicial cuando se crea una nueva reserva. El cliente ha solicitado la reserva pero aún no ha sido confirmada. Puede requerir:</p>
+                        <ul>
+                            <li>Verificación de disponibilidad</li>
+                            <li>Pago inicial o seña</li>
+                            <li>Confirmación de datos del huésped</li>
+                        </ul>
+                    </div>
+                    <div class="mb-3">
+                        <h6><span class="badge bg-info">Pre-reservada</span></h6>
+                        <p>La habitación está temporalmente apartada. En este estado:</p>
+                        <ul>
+                            <li>Se espera confirmación o pago del cliente</li>
+                            <li>Tiene un tiempo límite para confirmación</li>
+                            <li>La habitación está bloqueada temporalmente</li>
+                        </ul>
+                    </div>
+                    <div class="mb-3">
+                        <h6><span class="badge bg-success">Confirmada</span></h6>
+                        <p>La reserva está garantizada. En este estado:</p>
+                        <ul>
+                            <li>El pago o seña ha sido recibido</li>
+                            <li>La habitación está bloqueada para esas fechas</li>
+                            <li>Se espera la llegada del huésped</li>
+                        </ul>
+                    </div>
+                    <div class="mb-3">
+                        <h6><span class="badge" style="background-color: #6f42c1;">Check-in</span></h6>
+                        <p>El huésped está hospedado actualmente. Significa que:</p>
+                        <ul>
+                            <li>El huésped ya llegó al hotel</li>
+                            <li>La habitación está ocupada</li>
+                            <li>Se registró la entrada del huésped</li>
+                        </ul>
+                    </div>
+                    <div class="mb-3">
+                        <h6><span class="badge bg-secondary">Check-out</span></h6>
+                        <p>El huésped completó su estadía. En este estado:</p>
+                        <ul>
+                            <li>El huésped ya se retiró</li>
+                            <li>La habitación necesita limpieza</li>
+                            <li>La reserva está completada</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
+
+    // Inicializar calendario
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'es',
+        timeZone: 'America/Santiago',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,dayGridWeek'
+        },
+        buttonText: {
+            today: 'Hoy',
+            month: 'Mes',
+            week: 'Semana'
+        },
+        events: {
+            url: '{% url "reservations:calendar_events" %}',
+            method: 'GET',
+            failure: function(error) {
+                console.error('Error cargando eventos:', error);
+            },
+            success: function(events) {
+                console.log('Eventos cargados:', events.length);
+            }
+        },
+        loading: function(isLoading) {
+            if (isLoading) {
+                console.log('Cargando eventos...');
+            } else {
+                console.log('Eventos cargados');
+            }
+        },
+        selectable: true,
+        select: function(info) {
+            window.location.href = `{% url 'reservations:create' %}?check_in=${info.startStr}&check_out=${info.endStr}`;
+        },
+        eventClick: function(info) {
+            if (info.event.url) {
+                window.location.href = info.event.url;
+                info.jsEvent.preventDefault();
+            }
+        },
+        eventDidMount: function(info) {
+            info.el.title = `
+                Habitación: ${info.event.title}
+                Entrada: ${new Date(info.event.start).toLocaleDateString()}
+                Salida: ${new Date(info.event.end).toLocaleDateString()}
+            `;
+        },
+        dayMaxEvents: true,
+        firstDay: 1,
+        weekNumbers: true,
+        weekText: 'Sem',
+    });
+    calendar.render();
+
+    // Filtro de habitaciones
+    document.getElementById('room-filter').addEventListener('change', function(e) {
+        var roomId = e.target.value;
+        calendar.getEvents().forEach(event => {
+            if (roomId === 'all' || event.extendedProps.resourceId == roomId) {
+                event.setProp('display', 'auto');
+            } else {
+                event.setProp('display', 'none');
+            }
+        });
+        calendar.render();
+    });
+});
+</script>
+{% endblock %}

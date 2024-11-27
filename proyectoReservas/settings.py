@@ -15,7 +15,7 @@ env = environ.Env(
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # CONFIGURACIONES DE SEGURIDAD
-DEBUG = True  # Forzamos DEBUG a True durante desarrollo
+DEBUG = 'RENDER' not in os.environ
 
 # Desactivar todas las configuraciones de seguridad en desarrollo
 SECURE_SSL_REDIRECT = False
@@ -30,8 +30,11 @@ SECURE_HSTS_PRELOAD = False
 
 # Las demás configuraciones de seguridad
 SECRET_KEY = env('SECRET_KEY')
-ALLOWED_HOSTS = ['*'] if DEBUG else env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
-
+ALLOWED_HOSTS = ['*'] if DEBUG else [
+    'localhost',
+    '127.0.0.1',
+    '.onrender.com',  # Esto permitirá todos los subdominios de onrender.com
+]
 # Configuración de logging para ver más detalles
 LOGGING = {
     'version': 1,
@@ -77,6 +80,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Middleware de la aplicación
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',  # Para internacionalización
     'django.middleware.common.CommonMiddleware',

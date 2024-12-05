@@ -122,28 +122,28 @@ def editar_usuario(request, id):
         'es_usuario_actual': usuario == request.user
     })
 
+from .forms import CustomUserCreationForm, CustomUserChangeForm, UserProfileForm
+
 @login_required
 def perfil_usuario(request):
-    """Vista para que un usuario vea y edite su propio perfil"""
-    if request.method == 'POST':
-        form = CustomUserChangeForm(request.POST, instance=request.user)
-        if form.is_valid():
-            # Asegurarse de que el usuario no pueda desactivarse a sí mismo
-            form.cleaned_data['is_active'] = True
-            form.save()
-            messages.success(request, 'Perfil actualizado con éxito.')
-            return redirect('perfil_usuario')
-        else:
-            for field in form.errors:
-                for error in form.errors[field]:
-                    messages.error(request, f"{field}: {error}")
-    else:
-        form = CustomUserChangeForm(instance=request.user)
+   """Vista para que un usuario vea y edite su propio perfil"""
+   if request.method == 'POST':
+       form = UserProfileForm(request.POST, instance=request.user)  # Cambiado a UserProfileForm
+       if form.is_valid():
+           form.save()
+           messages.success(request, 'Perfil actualizado con éxito.')
+           return redirect('perfil_usuario')
+       else:
+           for field in form.errors:
+               for error in form.errors[field]:
+                   messages.error(request, f"{field}: {error}")
+   else:
+       form = UserProfileForm(instance=request.user)  # Cambiado a UserProfileForm
 
-    return render(request, 'usuarios/perfil_usuario.html', {
-        'form': form,
-        'usuario': request.user
-    })
+   return render(request, 'usuarios/perfil_usuario.html', {
+       'form': form,
+       'usuario': request.user
+   })
 
 @login_required
 def listar_usuarios(request):

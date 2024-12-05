@@ -73,7 +73,7 @@ class CustomUserChangeForm(forms.ModelForm):
     class Meta:
         model = CustomUser
         fields = ['username', 'email', 'nombre', 'apellido', 
-                 'dni', 'telefono', 'rol', 'is_active']
+                 'dni', 'telefono', 'is_active']
         widgets = {
             'username': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
@@ -81,7 +81,6 @@ class CustomUserChangeForm(forms.ModelForm):
             'apellido': forms.TextInput(attrs={'class': 'form-control'}),
             'dni': forms.TextInput(attrs={'class': 'form-control'}),
             'telefono': forms.TextInput(attrs={'class': 'form-control'}),
-            'rol': forms.Select(attrs={'class': 'form-control'}),
             'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
@@ -114,3 +113,16 @@ class CustomUserChangeForm(forms.ModelForm):
         if CustomUser.objects.filter(dni=dni).exclude(id=self.instance.id).exists():
             raise forms.ValidationError('Este DNI ya está registrado.')
         return dni
+    
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ['username', 'email', 'nombre', 'apellido', 'dni', 'telefono']
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'nombre': forms.TextInput(attrs={'class': 'form-control'}),
+            'apellido': forms.TextInput(attrs={'class': 'form-control'}),
+            'dni': forms.TextInput(attrs={'class': 'form-control'}),
+            'telefono': forms.TextInput(attrs={'class': 'form-control'}),
+        }

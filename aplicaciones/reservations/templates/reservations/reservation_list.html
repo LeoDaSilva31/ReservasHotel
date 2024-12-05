@@ -1,66 +1,109 @@
-<!-- aplicaciones/reservas/templates/reservas/lista_reservas.html -->
 {% extends 'home/bienvenida.html' %}
+
+{% block extra_css %}
+<style>
+   @keyframes heartbeat {
+       0% { transform: scale(1); background-color: #ffebee; }
+       50% { transform: scale(1.03); background-color: #ffcdd2; }
+       100% { transform: scale(1); background-color: #ffebee; }
+   }
+
+   .checkout-alert {
+       animation: heartbeat 3s ease-in-out infinite;
+       background-color: #ffebee;
+       border-left: 4px solid #ef5350;
+   }
+
+   .checkout-indicator {
+       color: #ef5350;
+       margin-right: 8px;
+   }
+</style>
+{% endblock %}
 
 {% block page_title %}Lista de Reservas{% endblock %}
 
 {% block contentVista %}
 <div class="row mb-4">
-    <div class="col">
-        <h2>Reservas</h2>
+   <div class="col">
+       <h2>Reservas</h2>
+   </div>
+
+   <div class="row mb-4">
+       <div class="col-md-3">
+           <form method="get" action="{% url 'reservations:list' %}">
+               <select class="form-select form-select-sm" name="status" onchange="this.form.submit()">
+                   <option value="">Todos los estados</option>
+                   {% for valor, display in estados %}
+                       <option value="{{ valor }}" {% if request.GET.status == valor %}selected{% endif %}>
+                           {{ display }}
+                       </option>
+                   {% endfor %}
+               </select>
+           </form>
+       </div>
     </div>
-    <div class="col text-end">
-        <a href="{% url 'reservations:create' %}" class="btn btn-primary">
-            Nueva Reserva
-        </a>
-    </div>
-    <div class="col-md-6 text-end">
-        <a href="{% url 'reservations:calendar' %}" class="btn btn-secondary">
-            <i class="fas fa-calendar"></i> Ir al Calendario
-        </a>
-    </div>
+
+   <div class="col text-end">
+       <a href="{% url 'reservations:create' %}" class="btn btn-primary">
+           Nueva Reserva
+       </a>
+       <a href="{% url 'reservations:calendar' %}" class="btn btn-primary">
+           Ir al Calendario de Reserva
+       </a>
+   </div>
 </div>
 
 <div class="table-responsive">
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Huésped</th>
-                <th>Habitación</th>
-                <th>Entrada</th>
-                <th>Salida</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for reservation in reservations %}
-            <tr>
-                <td>{{ reservation.guest_name }}</td>
-                <td>{{ reservation.room }}</td>
-                <td>{{ reservation.check_in }}</td>
-                <td>{{ reservation.check_out }}</td>
-                <td>
-                    <span class="badge {% if reservation.status == 'confirmed' %}bg-success
-                        {% elif reservation.status == 'pending' %}bg-warning
-                        {% elif reservation.status == 'cancelled' %}bg-danger
-                        {% elif reservation.status == 'pre_reserved' %}bg-info
-                        {% else %}bg-secondary{% endif %}">
-                        {{ reservation.get_status_display }}
-                    </span>
-                </td>
-                <td>
-                    <a href="{% url 'reservations:detail' reservation.pk %}" 
-                       class="btn btn-sm btn-info">Ver</a>
-                    <a href="{% url 'reservations:update' reservation.pk %}" 
-                       class="btn btn-sm btn-warning">Editar</a>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="6" class="text-center">No hay reservas registradas.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+   <table class="table table-striped">
+       <thead>
+           <tr>
+               <th></th>  <!-- Nueva columna para indicador -->
+               <th>Huésped</th>
+               <th>Habitación</th>
+               <th>Entrada</th>
+               <th>Salida</th>
+               <th>Estado</th>
+               <th>Acciones</th>
+           </tr>
+       </thead>
+       <tbody>
+           {% for reservation in reservations %}
+           <tr class="{% if reservation.show_alert %}checkout-alert{% endif %}">
+               <td>
+                   {% if reservation.show_alert %}
+                   <div class="checkout-indicator">
+                       <i class="fas fa-clock"></i>
+                   </div>
+                   {% endif %}
+               </td>
+               <td>{{ reservation.guest_name }}</td>
+               <td>{{ reservation.room }}</td>
+               <td>{{ reservation.check_in }}</td>
+               <td>{{ reservation.check_out }}</td>
+               <td>
+                   <span class="badge {% if reservation.status == 'confirmed' %}bg-success
+                       {% elif reservation.status == 'pending' %}bg-warning
+                       {% elif reservation.status == 'cancelled' %}bg-danger
+                       {% elif reservation.status == 'pre_reserved' %}bg-info
+                       {% elif reservation.status == 'checked_in' %}bg-primary
+                       {% else %}bg-secondary{% endif %}">
+                       {{ reservation.get_status_display }}
+                   </span>
+               </td>
+               <td>
+                   <a href="{% url 'reservations:detail' reservation.pk %}" 
+                      class="btn btn-sm btn-info">Ver</a>
+                   <a href="{% url 'reservations:update' reservation.pk %}" 
+                      class="btn btn-sm btn-warning">Editar</a>
+               </td>
+           </tr>
+           {% empty %}
+           <tr>
+               <td colspan="7" class="text-center">No hay reservas registradas.</td>
+           </tr>
+           {% endfor %}
+       </tbody>
+   </table>
 </div>
 {% endblock %}

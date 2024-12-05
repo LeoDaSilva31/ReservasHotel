@@ -9,8 +9,8 @@ from aplicaciones.rooms.models import Room
 
 class Reservation(models.Model):
     STATUS_CHOICES = [
-        ('pre_reserved', 'Pre-reservada'),
-        ('pending', 'Pendiente'),
+        #('pre_reserved', 'Pre-reservada'),
+        #('pending', 'Pendiente'),
         ('confirmed', 'Confirmada'),
         ('checked_in', 'Check-in'),
         ('checked_out', 'Check-out'),

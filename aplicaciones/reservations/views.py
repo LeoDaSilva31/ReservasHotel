@@ -12,14 +12,46 @@ from django.http import JsonResponse
 from django.db.models import Q
 from datetime import date, datetime
 
+from datetime import datetime, time, timedelta
+from django.utils import timezone
 
+
+# Vista para listar todas las reservas
 class ReservationListView(LoginRequiredMixin, ListView):
     model = Reservation
     template_name = 'reservations/reservation_list.html'
     context_object_name = 'reservations'
     
+    # Aquí podrías agregar el filtro por estado
     def get_queryset(self):
-        return Reservation.objects.all().select_related('room', 'created_by')
+        queryset = Reservation.objects.all().select_related('room', 'created_by')
+        status = self.request.GET.get('status')
+    
+        checkout_time = time(10, 0)  # 10:00 AM
+        for reservation in queryset:
+            checkout_datetime = datetime.combine(
+                reservation.check_out, 
+                checkout_time
+            ).replace(tzinfo=timezone.get_current_timezone())
+            alert_start = checkout_datetime - timedelta(days=1)
+            
+            reservation.show_alert = (
+                timezone.now() >= alert_start and 
+                timezone.now() <= checkout_datetime and
+                reservation.status not in ['checked_out', 'cancelled']
+            )
+        
+        if status:
+                queryset = queryset.filter(status=status)
+        return queryset
+
+    # Agregar este método para enviar los estados al template
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Usar las tuplas completas de STATUS_CHOICES para tener valor y display
+        context['estados'] = Reservation.STATUS_CHOICES
+        context['selected_status'] = self.request.GET.get('status', '')
+        return context
 
 class ReservationDetailView(LoginRequiredMixin, DetailView):
     model = Reservation
@@ -71,33 +103,44 @@ class ReservationUpdateView(LoginRequiredMixin, UpdateView):
     template_name = 'reservations/reservation_form.html'
     success_url = reverse_lazy('reservations:list')
 
+# Vista del calendario
 class CalendarView(LoginRequiredMixin, TemplateView):
     template_name = 'reservations/calendar.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['rooms'] = Room.objects.all()  # Quitamos el filter is_active si no existe
+        # Obtiene todas las habitaciones
+        context['rooms'] = Room.objects.all()
         return context
 
     def get(self, request, *args, **kwargs):
+        # Si la URL contiene 'events', devuelve los eventos del calendario
         if 'events' in request.path:
             return self.get_events(request)
         return super().get(request, *args, **kwargs)
 
     def get_events(self, request):
-        """API endpoint para obtener eventos del calendario"""
+        """Obtiene los eventos para el calendario"""
+        # AQUÍ ES DONDE PUEDES MODIFICAR QUÉ ESTADOS SE MUESTRAN
+        # Cambia esta línea para excluir más estados:
         reservations = Reservation.objects.select_related('room').exclude(
-            status='cancelled'
+            status__in=['cancelled', 'checked_out']  # Agrega más estados aquí
         )
 
+        # O alternativamente, filtra solo por los estados que quieres mostrar:
+        # reservations = Reservation.objects.select_related('room').filter(
+        #     status__in=['confirmed', 'pending', 'pre_reserved', 'checked_in']
+        # )
+
         events = []
+        # Define los colores para cada estado
         for reservation in reservations:
             color = {
-                'confirmed': '#28a745',  # verde
-                'pending': '#ffc107',    # amarillo
+                'confirmed': '#28a745',    # verde
+                'pending': '#ffc107',      # amarillo
                 'pre_reserved': '#17a2b8', # azul
-                'checked_in': '#6f42c1',  # morado
-                'checked_out': '#6c757d', # gris
+                'checked_in': '#6f42c1',   # morado
+                'checked_out': '#6c757d',  # gris
             }.get(reservation.status, '#dc3545')  # rojo por defecto
 
             events.append({
